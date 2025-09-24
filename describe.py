@@ -6,7 +6,7 @@
 #    By: dsindres <dsindres@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/08 13:19:35 by dsindres          #+#    #+#              #
-#    Updated: 2025/09/23 16:06:47 by dsindres         ###   ########.fr        #
+#    Updated: 2025/09/24 11:56:10 by dsindres         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,6 +15,67 @@ import pandas as pd
 from pathlib import Path
 import sys
 
+
+def display_quartiles(data, features, count):
+    q1 = []
+    med = []
+    q3 = []
+
+    # Convertir les données en numpy array numérique
+    data_num = np.array([[float(x) if x != "" else np.nan for x in row] for row in data])
+    
+    for idx_col, col in enumerate(features):
+        column_data = data_num[:, idx_col]
+        
+        # enlever les NaN
+        valid_data = column_data[~np.isnan(column_data)]
+        
+        # Trier
+        sorted_col = np.sort(valid_data)
+        n = len(sorted_col)
+        
+        if n == 0:
+            q1.append(None)
+            med.append(None) 
+            q3.append(None)
+            continue
+            
+        # Q1 = 25ème percentile
+        q1_pos = (n - 1) * 0.25
+        if q1_pos == int(q1_pos):
+            q1_value = sorted_col[int(q1_pos)]
+        else:
+            lower = int(q1_pos)
+            upper = lower + 1
+            weight = q1_pos - lower
+            q1_value = sorted_col[lower] * (1 - weight) + sorted_col[upper] * weight
+        
+        # Médiane = 50ème percentile  
+        med_pos = (n - 1) * 0.5
+        if med_pos == int(med_pos):
+            med_value = sorted_col[int(med_pos)]
+        else:
+            lower = int(med_pos)
+            upper = lower + 1
+            weight = med_pos - lower
+            med_value = sorted_col[lower] * (1 - weight) + sorted_col[upper] * weight
+            
+        # Q3 = 75ème percentile
+        q3_pos = (n - 1) * 0.75
+        if q3_pos == int(q3_pos):
+            q3_value = sorted_col[int(q3_pos)]
+        else:
+            lower = int(q3_pos)
+            upper = lower + 1  
+            weight = q3_pos - lower
+            q3_value = sorted_col[lower] * (1 - weight) + sorted_col[upper] * weight
+            
+        q1.append(q1_value)
+        med.append(med_value)
+        q3.append(q3_value)
+    
+    return q1, med, q3
+            
 
 def display_max(data, features):
     li = []
@@ -142,6 +203,25 @@ def data_display(data, features):
         max_formated = f"{value:.4f}"
         print(f"{max_formated}{add_space(str(max_formated))}", end="")
 
+    print("")
+    q1, med, q3 = display_quartiles(data, features, count)
+    print(f"25%{add_space('25%')}", end="")
+    for value in q1:
+        q1_formated = f"{float(value):.4f}"
+        print(f"{q1_formated}{add_space(str(q1_formated))}", end="")
+
+    print("")
+    print(f"50%{add_space('50%')}", end="")
+    for value in med:
+        med_formated = f"{float(value):.4f}"
+        print(f"{med_formated}{add_space(str(med_formated))}", end="")
+
+    print("")
+    print(f"75%{add_space('75%')}", end="")
+    for value in q3:
+        q3_formated = f"{float(value):.4f}"
+        print(f"{q3_formated}{add_space(str(q3_formated))}", end="")
+
     
 def trunc(text: str):
     return text[:10]
@@ -203,12 +283,9 @@ if __name__ == "__main__":
 
     features = first_line.split(",")
 
-    #print(features)
 
     data = np.array(pd.read_csv(filename))
     data_model, features_model = numerical_data(data, features)
     data_display(data_model, features_model)
     
-    #print(data_to_print)
-
         
