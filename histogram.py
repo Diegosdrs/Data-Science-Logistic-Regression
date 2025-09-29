@@ -6,7 +6,7 @@
 #    By: dsindres <dsindres@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/24 12:05:00 by dsindres          #+#    #+#              #
-#    Updated: 2025/09/24 15:16:40 by dsindres         ###   ########.fr        #
+#    Updated: 2025/09/29 10:00:34 by dsindres         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,7 +31,7 @@ def plot_histogram(df):
     """
     
     # Trouve les colonnes de cours (exclut la maison et autres infos)
-    house_col = "Hogwarts House"  # Adapte selon ton CSV
+    house_col = "Hogwarts House"
     course_cols = [col for col in df.columns if col not in [house_col, "Index", "First Name", "Last Name", "Birthday", "Best Hand"]]
     
     houses = df[house_col].unique()
