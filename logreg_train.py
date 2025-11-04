@@ -6,7 +6,7 @@
 #    By: dsindres <dsindres@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/24 13:46:08 by dsindres          #+#    #+#              #
-#    Updated: 2025/09/24 14:49:55 by dsindres         ###   ########.fr        #
+#    Updated: 2025/11/04 13:30:03 by dsindres         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,6 +16,10 @@ import numpy as np
 from my_logistic_regression import MyLogisticRegression as MyLR
 
 def main():
+    if len(sys.argv) < 2:
+        print("Erreur: mauvais nombre d'argument")
+        sys.exit(1)
+        
     data = pd.read_csv(sys.argv[1])
 
     # Features choisies et NaN remplacés par la moyenne

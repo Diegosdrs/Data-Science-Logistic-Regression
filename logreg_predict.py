@@ -6,25 +6,34 @@
 #    By: dsindres <dsindres@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/24 14:36:51 by dsindres          #+#    #+#              #
-#    Updated: 2025/09/24 14:50:05 by dsindres         ###   ########.fr        #
+#    Updated: 2025/11/04 13:36:42 by dsindres         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 import sys
 import pandas as pd
 import numpy as np
+from pathlib import Path
 from my_logistic_regression import MyLogisticRegression as MyLR
 
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
 def main():
+    if len(sys.argv) < 2:
+        print("Erreur: mauvais nombre d'argument")
+        sys.exit(1)
     X_test = pd.read_csv(sys.argv[1])
     X_features = X_test[["Astronomy", "Herbology"]].copy().fillna(X_test[["Astronomy","Herbology"]].mean())
     X = np.array(X_features)
 
     # Standardisation (centrée-réduite) du test
     X_norm = (X - X.mean(axis=0)) / X.std(axis=0)
+
+    file_theta = Path("./thetas.csv")
+    if not file_theta.exists():
+        print("Erreur: pas de fichier thetas trouve")
+        sys.exit(1)
 
     thetas_df = pd.read_csv("thetas.csv")
 

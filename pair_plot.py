@@ -6,7 +6,7 @@
 #    By: dsindres <dsindres@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/24 13:25:27 by dsindres          #+#    #+#              #
-#    Updated: 2025/09/24 15:17:14 by dsindres         ###   ########.fr        #
+#    Updated: 2025/11/04 13:55:32 by dsindres         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,9 +17,6 @@ import numpy as np
 import sys
 
 def plot_pairplot(df):
-    """
-    Crée un pair plot pour analyser toutes les relations entre features
-    """
     house_col = "Hogwarts House"
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
     
@@ -30,7 +27,7 @@ def plot_pairplot(df):
     
     plot_data = plot_data.dropna()
     
-    plt.figure(figsize=(15, 15))
+    #plt.figure(figsize=(15, 15))
     
     try:
         sns.pairplot(plot_data, hue=house_col, diag_kind='hist', plot_kws={'alpha':0.6})

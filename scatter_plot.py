@@ -6,7 +6,7 @@
 #    By: dsindres <dsindres@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/24 13:14:28 by dsindres          #+#    #+#              #
-#    Updated: 2025/09/24 15:17:40 by dsindres         ###   ########.fr        #
+#    Updated: 2025/11/04 14:04:25 by dsindres         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,9 +16,6 @@ import numpy as np
 import sys
 
 def plot_scatter(df):
-    """
-    Affiche des scatter plots pour trouver les deux features similaires
-    """
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
     
     if 'Index' in numeric_cols:

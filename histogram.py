@@ -6,7 +6,7 @@
 #    By: dsindres <dsindres@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/24 12:05:00 by dsindres          #+#    #+#              #
-#    Updated: 2025/09/29 10:00:34 by dsindres         ###   ########.fr        #
+#    Updated: 2025/11/04 13:57:09 by dsindres         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,7 +16,6 @@ import numpy as np
 import sys
 
 def load_data(filename):
-    """Charge les données du fichier CSV"""
     try:
         df = pd.read_csv(filename)
         return df
@@ -25,11 +24,6 @@ def load_data(filename):
         sys.exit(1)
 
 def plot_histogram(df):
-    """
-    Affiche des histogrammes pour chaque cours, groupés par maison
-    pour répondre à: Quel cours a une distribution homogène entre maisons?
-    """
-    
     # Trouve les colonnes de cours (exclut la maison et autres infos)
     house_col = "Hogwarts House"
     course_cols = [col for col in df.columns if col not in [house_col, "Index", "First Name", "Last Name", "Birthday", "Best Hand"]]

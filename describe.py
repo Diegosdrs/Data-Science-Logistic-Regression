@@ -6,7 +6,7 @@
 #    By: dsindres <dsindres@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/08 13:19:35 by dsindres          #+#    #+#              #
-#    Updated: 2025/09/24 11:56:10 by dsindres         ###   ########.fr        #
+#    Updated: 2025/10/29 11:06:53 by dsindres         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -250,7 +250,7 @@ def numerical_data(data : np.ndarray , features):
     new_data = []
     numeric_data_features = []
 
-    first_line_data = data[1]
+    first_line_data = data[0]
     for idx_col, value in enumerate(first_line_data):
         try:
             float(value)
@@ -260,6 +260,8 @@ def numerical_data(data : np.ndarray , features):
             continue
     
     new_data = np.array(new_data, dtype=float).T
+
+    #print(f"{new_data[:5]}")
     
     return (supp_index(new_data, numeric_data_features))
     
@@ -272,15 +274,12 @@ if __name__ == "__main__":
     filename = sys.argv[1]
     file_path = Path(filename)
 
-
     if not file_path.exists() or not file_path.is_file():
         print(f"Erreur: fichier introuvable")
         sys.exit(1)
 
     with open(filename, "r") as f:
         first_line = f.readline().strip()
-
-
     features = first_line.split(",")
 
 
