@@ -129,7 +129,10 @@ def display_std(data, features, mean, count):
                 res_sum += res_1
             except ValueError:
                 continue
-        res_final = (res_sum / count[idx_col]) ** 0.5
+        # n-1 (et non n) pour matcher l'ecart-type "echantillon" utilise
+        # par defaut par pandas.describe() (correction de Bessel)
+        ddof = count[idx_col] - 1 if count[idx_col] > 1 else 1
+        res_final = (res_sum / ddof) ** 0.5
         li.append(res_final)
     return li
 
@@ -157,23 +160,85 @@ def display_count(data, features):
     li = []
     for idx_col, col in enumerate(features):
         count = 0
-        for idx_row, value in enumerate(data):
-            count += 1
+        for idx_row, row in enumerate(data):
+            value = row[idx_col]
+            if value == "" or pd.isna(value):
+                continue
+            try:
+                value = float(value)
+                count += 1
+            except ValueError:
+                continue
         li.append(count)
+    return li
+
+
+def display_missing(data, features, count):
+    li = []
+    total = len(data)
+    for idx_col, col in enumerate(features):
+        li.append(total - count[idx_col])
+    return li
+
+
+def display_variance(std):
+    return [s ** 2 for s in std]
+
+
+def display_range(mini, maxi):
+    return [ma - mi for mi, ma in zip(mini, maxi)]
+
+
+def display_iqr(q1, q3):
+    return [q3_val - q1_val for q1_val, q3_val in zip(q1, q3)]
+
+
+def display_skewness(data, features, mean, count):
+    li = []
+    for idx_col, col in enumerate(features):
+        m2_sum = 0.0
+        m3_sum = 0.0
+        for idx_row, row in enumerate(data):
+            value = row[idx_col]
+            if value == "" or pd.isna(value):
+                continue
+            try:
+                value = float(value)
+                diff = value - mean[idx_col]
+                m2_sum += diff ** 2
+                m3_sum += diff ** 3
+            except ValueError:
+                continue
+
+        n = count[idx_col]
+        if n == 0:
+            li.append(None)
+            continue
+
+        m2 = m2_sum / n
+        m3 = m3_sum / n
+
+        if m2 == 0:
+            li.append(0.0)
+            continue
+
+        li.append(m3 / (m2 ** 1.5))
     return li
 
 
 def data_display(data, features):
     print("               ", end="")
     for ft in features:
-        print(f"{trunc(str(ft))}{add_space(str(ft))}", end="")
+        displayed = trunc(str(ft))
+        print(f"{displayed}{add_space(displayed)}", end="")
 
     print("")
         
     count = display_count(data, features)    
     print(f"Count{add_space('count')}", end="")
     for value in count:
-        print(f"{trunc(str(value))}{add_space(str(value))}", end="")
+        displayed = trunc(str(value))
+        print(f"{displayed}{add_space(displayed)}", end="")
 
     print("")
     mean = display_mean(data, features)
@@ -222,18 +287,53 @@ def data_display(data, features):
         q3_formated = f"{float(value):.4f}"
         print(f"{q3_formated}{add_space(str(q3_formated))}", end="")
 
-    
+    print("")
+    missing = display_missing(data, features, count)
+    print(f"Missing{add_space('missing')}", end="")
+    for value in missing:
+        displayed = trunc(str(value))
+        print(f"{displayed}{add_space(displayed)}", end="")
+
+    print("")
+    variance = display_variance(std)
+    print(f"Variance{add_space('variance')}", end="")
+    for value in variance:
+        var_formated = f"{value:.4f}"
+        print(f"{var_formated}{add_space(str(var_formated))}", end="")
+
+    print("")
+    range_ = display_range(mini, maxi)
+    print(f"Range{add_space('range')}", end="")
+    for value in range_:
+        range_formated = f"{value:.4f}"
+        print(f"{range_formated}{add_space(str(range_formated))}", end="")
+
+    print("")
+    iqr = display_iqr(q1, q3)
+    print(f"IQR{add_space('iqr')}", end="")
+    for value in iqr:
+        iqr_formated = f"{value:.4f}"
+        print(f"{iqr_formated}{add_space(str(iqr_formated))}", end="")
+
+    print("")
+    skewness = display_skewness(data, features, mean, count)
+    print(f"Skewness{add_space('skewness')}", end="")
+    for value in skewness:
+        skew_formated = f"{value:.4f}"
+        print(f"{skew_formated}{add_space(str(skew_formated))}", end="")
+
+    print("")
+
+
 def trunc(text: str):
     return text[:10]
         
 
 def add_space(text: str) -> str:
-    if len(text) >= 10:
-        text_space = " " * 5
-    else:
-        nbr_of_space = 15 - len(text)
-        text_space = " " * nbr_of_space
-    return text_space
+    nbr_of_space = 15 - len(text)
+    if nbr_of_space < 1:
+        nbr_of_space = 1
+    return " " * nbr_of_space
 
     
 def supp_index(new_data, numeric_data_features):
@@ -286,5 +386,3 @@ if __name__ == "__main__":
     data = np.array(pd.read_csv(filename))
     data_model, features_model = numerical_data(data, features)
     data_display(data_model, features_model)
-    
-        

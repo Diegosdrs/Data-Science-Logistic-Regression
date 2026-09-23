@@ -12,9 +12,14 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 import sys
+
+try:
+    import seaborn as sns
+    HAS_SEABORN = True
+except ImportError:
+    HAS_SEABORN = False
 
 def plot_pairplot(df):
     house_col = "Hogwarts House"
@@ -29,31 +34,53 @@ def plot_pairplot(df):
     
     #plt.figure(figsize=(15, 15))
     
-    try:
+    if HAS_SEABORN:
         sns.pairplot(plot_data, hue=house_col, diag_kind='hist', plot_kws={'alpha':0.6})
         plt.suptitle('Pair Plot - Analyse des relations entre features', y=1.02)
+        plt.savefig('pair_plot.png', dpi=150)
+        print("Pair plot sauvegarde dans 'pair_plot.png'")
         plt.show()
-    except ImportError:
+    else:
         n_features = len(numeric_cols)
-        fig, axes = plt.subplots(n_features, n_features, figsize=(15, 15))
-        
+        houses = plot_data[house_col].unique()
+        colors = ['red', 'green', 'blue', 'orange']
+
+        fig, axes = plt.subplots(n_features, n_features, figsize=(28, 28))
+
         for i in range(n_features):
             for j in range(n_features):
                 ax = axes[i, j]
-                
+
                 if i == j:
-                    ax.hist(plot_data[numeric_cols[i]].dropna(), bins=20, alpha=0.7)
-                    ax.set_title(numeric_cols[i])
+                    # diagonale : histogramme empile par maison
+                    for k, house in enumerate(houses):
+                        house_data = plot_data[plot_data[house_col] == house][numeric_cols[i]]
+                        ax.hist(house_data, bins=15, alpha=0.5, color=colors[k % len(colors)])
                 else:
-                    clean_data = plot_data[[numeric_cols[j], numeric_cols[i]]].dropna()
-                    ax.scatter(clean_data[numeric_cols[j]], clean_data[numeric_cols[i]], alpha=0.6)
-                    
+                    # hors diagonale : nuage de points colore par maison,
+                    for k, house in enumerate(houses):
+                        house_data = plot_data[plot_data[house_col] == house]
+                        ax.scatter(house_data[numeric_cols[j]], house_data[numeric_cols[i]],
+                                   alpha=0.4, s=3, color=colors[k % len(colors)])
+
+                # on enleve les graduations internes pas lisible a cette taille
+                ax.set_xticks([])
+                ax.set_yticks([])
+                # afficher colonnes et lignes que sur les premieres 
                 if i == n_features - 1:
-                    ax.set_xlabel(numeric_cols[j])
+                    ax.set_xlabel(numeric_cols[j], rotation=45, ha='right', fontsize=8)
                 if j == 0:
-                    ax.set_ylabel(numeric_cols[i])
-        
+                    ax.set_ylabel(numeric_cols[i], rotation=0, ha='right', fontsize=8)
+
+        # legende 
+        handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=colors[k % len(colors)],
+                   markersize=8, label=house) for k, house in enumerate(houses)]
+        fig.legend(handles=handles, loc='upper right', fontsize=12)
+
+        plt.suptitle('Pair Plot - Analyse des relations entre features', y=1.0)
         plt.tight_layout()
+        plt.savefig('pair_plot.png', dpi=150)
+        print("Pair plot sauvegarde dans 'pair_plot.png'")
         plt.show()
 
     

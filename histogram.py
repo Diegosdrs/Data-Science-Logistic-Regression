@@ -51,6 +51,10 @@ def plot_histogram(df):
         ax.set_ylabel('Fréquence')
         ax.legend()
         ax.grid(True, alpha=0.3)
+
+    # Cache les cases de la grille non utilisees (16 cases pour 13 cours)
+    for idx in range(len(course_cols), len(axes)):
+        axes[idx].set_visible(False)
     
     plt.tight_layout()
     plt.suptitle('Distribution des notes par cours et par maison', y=1.02)

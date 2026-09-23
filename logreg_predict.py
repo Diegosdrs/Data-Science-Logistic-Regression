@@ -20,36 +20,47 @@ def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
 def main():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print("Erreur: mauvais nombre d'argument")
+        print("Usage: python3 logreg_predict.py <dataset_test.csv> <thetas.csv>")
         sys.exit(1)
-    X_test = pd.read_csv(sys.argv[1])
-    X_features = X_test[["Astronomy", "Herbology"]].copy().fillna(X_test[["Astronomy","Herbology"]].mean())
-    X = np.array(X_features)
 
-    # Standardisation (centrée-réduite) du test
-    X_norm = (X - X.mean(axis=0)) / X.std(axis=0)
-
-    file_theta = Path("./thetas.csv")
+    file_theta = Path(sys.argv[2])
     if not file_theta.exists():
         print("Erreur: pas de fichier thetas trouve")
         sys.exit(1)
 
-    thetas_df = pd.read_csv("thetas.csv")
+    thetas_df = pd.read_csv(sys.argv[2])
 
-    # Récupérer les maisons
+    features = ["Arithmancy", "Astronomy", "Herbology", "Defense Against the Dark Arts",
+                "Divination", "Muggle Studies", "Ancient Runes", "History of Magic",
+                "Transfiguration", "Potions", "Care of Magical Creatures", "Charms", "Flying"]
+
+    X_test = pd.read_csv(sys.argv[1])
+    X_features = X_test[features].copy().fillna(X_test[features].mean())
+    X = np.array(X_features)
+
+    # Standardisation avec la moyenne/ecart-type sauvegardes par logreg_train.py 
+    mean_train = np.array([thetas_df[f"mean_{f}"].iloc[0] for f in features])
+    std_train = np.array([thetas_df[f"std_{f}"].iloc[0] for f in features])
+
+    scaler = MyLR(thetas=np.zeros((X.shape[1] + 1, 1)))
+    X_norm = scaler.standardize(X, mean=mean_train, std=std_train)
+
+    # recuperer les maisons
     houses = [col.split("_theta_0")[0] for col in thetas_df.columns if "_theta_0" in col]
     probs = np.zeros((X_norm.shape[0], len(houses)))
 
     for j, house in enumerate(houses):
-        theta_cols = [col for col in thetas_df.columns if col.startswith(house)]
+        theta_cols = [col for col in thetas_df.columns if col.startswith(f"{house}_theta")]
         theta_values = thetas_df[theta_cols].values.flatten().reshape(-1, 1)
 
         X_ = np.c_[np.ones((X_norm.shape[0], 1)), X_norm]
+        # trouver la prediction
         y_hat = sigmoid(X_.dot(theta_values))
         probs[:, j] = y_hat.flatten()
 
-    # Maison avec probabilité maximale
+    # trouver la proba maaaaax
     predicted_indices = np.argmax(probs, axis=1)
     predicted_houses = [houses[i] for i in predicted_indices]
 
@@ -62,4 +73,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

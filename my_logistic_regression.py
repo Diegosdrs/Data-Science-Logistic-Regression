@@ -34,8 +34,18 @@ class MyLogisticRegression():
             self.thetas -= self.alpha * gradient
         return self.thetas
 
-    def predict_(self, X):
-        m = len(X)
-        X_ = np.c_[np.ones((m, 1)), X]
-        y_hat = self.sigmoid(X_.dot(self.thetas))
-        return (y_hat >= 0.5).astype(int)
+    def standardize(self, X, mean=None, std=None):
+        if not isinstance(X, np.ndarray):
+            return None
+        if X.size == 0:
+            return None
+
+        if mean is None or std is None:
+            mean = X.mean(axis=0)
+            std = X.std(axis=0)
+
+        self.mean_ = mean
+        self.std_ = std
+
+        new_X = (X - mean) / std
+        return new_X
